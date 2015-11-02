@@ -1,0 +1,8 @@
+applications:
+- disk_quota: 1024M
+  host: java-tsdb
+  name: java-tsdb
+  path: java_rest_HelloGalaxy.war
+  domain: stage1.mybluemix.net
+  instances: 1
+  memory: 512M

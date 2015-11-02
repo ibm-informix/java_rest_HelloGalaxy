@@ -67,6 +67,8 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 public class java_rest_HelloGalaxy {
 	
 	public static String URL = "";
+	public static String user = "";
+	public static String password = "";
 	public static List<String> commands = new ArrayList<String>();
 	public static List<JsonObject> itemsToPost = new ArrayList<JsonObject>();
 	public static List<Query> queries = new ArrayList<Query>();
@@ -81,12 +83,6 @@ public class java_rest_HelloGalaxy {
 	public static final City sydney = new City("Sydney", 4293000, -33.8651, -151.2094, 61);
 	
 	public static void main(String[] args) {
-		// connect to bluemix
-    	//if (args[0] != null)
-		//URL = args[0];
-		//else
-		//parseVcap();
-		
 		doEverything();
 		
 		//print log
@@ -96,15 +92,16 @@ public class java_rest_HelloGalaxy {
 	}
 
 	public static List<String> doEverything() {
+		// parse VCAP_SERVICES from Bluemix environment
+		parseVcap();
 		
 		String reply = "";
-		String db = "dbTest";
 		String collection = "mycollection";
 		String collectionJoin = "collectionjoin";
 		String table = "mytable";
 		String tableJoin = "tablejoin";
 		//get access to get, post, put, delete methods
-		REST restAPI = new REST("cloudqa", "cloud4pass");
+		REST restAPI = new REST(user, password);
 		
 		
 		commands.add("Connected to: " + URL);
@@ -120,7 +117,7 @@ public class java_rest_HelloGalaxy {
 				.add("name", collection).build();
 		itemsToPost.clear();
 		itemsToPost.add(createCollection);
-		reply = restAPI.post(URL + db, itemsToPost);
+		reply = restAPI.post(URL, itemsToPost);
 		
 		commands.add("\tCollection: " + reply);
 		//<------------------------------------->
@@ -163,7 +160,7 @@ public class java_rest_HelloGalaxy {
 		System.out.println(createTable);
 		itemsToPost.clear();
 		itemsToPost.add(createTable);
-		reply = restAPI.post(URL + db, itemsToPost);
+		reply = restAPI.post(URL, itemsToPost);
 		
 		commands.add("\tTable: " + reply);
 		//<------------------------------------->
@@ -176,8 +173,8 @@ public class java_rest_HelloGalaxy {
 		
 		itemsToPost.clear();
 		itemsToPost.add(kansasCity.toJson());
-		reply = restAPI.post(URL + db + "/" + collection, itemsToPost);
-		reply = restAPI.post(URL + db + "/" + table, itemsToPost);
+		reply = restAPI.post(URL + "/" + collection, itemsToPost);
+		reply = restAPI.post(URL + "/" + table, itemsToPost);
 		
 		commands.add("\tSingle Insert Document: "
 				+ kansasCity.toJson());
@@ -195,8 +192,8 @@ public class java_rest_HelloGalaxy {
 		itemsToPost.add(tokyo.toJson());
 		itemsToPost.add(madrid.toJson());
 		itemsToPost.add(melbourne.toJson());
-		reply = restAPI.post(URL + db + "/" + collection, itemsToPost);
-		reply = restAPI.post(URL + db + "/" + table, itemsToPost);
+		reply = restAPI.post(URL + "/" + collection, itemsToPost);
+		reply = restAPI.post(URL + "/" + table, itemsToPost);
 		
 		for (JsonObject city : itemsToPost) {
 			commands.add("\tMultiple Insert Document -> " + city.toString());
@@ -231,7 +228,7 @@ public class java_rest_HelloGalaxy {
 		queries.clear();
 		queries.add(population);
 		queries.add(fields);
-		reply = restAPI.get(URL + db + "/" + collection, queries);
+		reply = restAPI.get(URL + "/" + collection, queries);
 		
 		for (Query query : queries)
 		commands.add("\tDocument Query -> " + query.toString());
@@ -243,7 +240,7 @@ public class java_rest_HelloGalaxy {
 		commands.add("3.2 Find all documents in a collection");
 		//url/dbTest/mycollection
 		
-		reply = restAPI.get(URL + db + "/" + collection, null);
+		reply = restAPI.get(URL + "/" + collection, null);
 		
 		commands.add("\tList all Documents: "
 						+ reply);
@@ -267,7 +264,7 @@ public class java_rest_HelloGalaxy {
 		count.setQueryValue(queryValue);
 		queries.clear();
 		queries.add(count);
-		reply = restAPI.get(URL + db + "/$cmd", queries);
+		reply = restAPI.get(URL + "/$cmd", queries);
 		
 		commands.add("\tNumber of documents: " + reply);
 		//<------------------------------------->
@@ -279,7 +276,7 @@ public class java_rest_HelloGalaxy {
 		Query sort = new Query("sort", Json.createObjectBuilder().add("population",1).build());
 		queries.clear();
 		queries.add(sort);
-		reply = restAPI.get(URL + db + "/" + collection, queries);
+		reply = restAPI.get(URL + "/" + collection, queries);
 		
 		commands.add("\tSorted Documents: " + reply);
 		//<------------------------------------->
@@ -304,7 +301,7 @@ public class java_rest_HelloGalaxy {
 		System.out.println(distinct);
 		queries.clear();
 		queries.add(distinct);
-		reply = restAPI.get(URL + db + "/$cmd", queries);
+		reply = restAPI.get(URL + "/$cmd", queries);
 		
 		commands.add("\tDistinct Documents: " + reply);
 		//<------------------------------------->
@@ -317,14 +314,14 @@ public class java_rest_HelloGalaxy {
 				.add("name", collectionJoin).build();
 		itemsToPost.clear();
 		itemsToPost.add(createCollectionJoin);
-		reply = restAPI.post(URL + db, itemsToPost);
+		reply = restAPI.post(URL, itemsToPost);
 		itemsToPost.clear();
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 1).add("country", "United States of America").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 44).add("country", "United Kingdom").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 81).add("country", "Japan").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 34).add("country", "Spain").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 61).add("country", "Australia").build());
-		reply = restAPI.post(URL + db + "/" + collectionJoin, itemsToPost);
+		reply = restAPI.post(URL + "/" + collectionJoin, itemsToPost);
 		
 		
 		//create table to join and add data
@@ -347,14 +344,14 @@ public class java_rest_HelloGalaxy {
 				.build();
 		itemsToPost.clear();
 		itemsToPost.add(createTableJoin);
-		reply = restAPI.post(URL + db, itemsToPost);
+		reply = restAPI.post(URL, itemsToPost);
 		itemsToPost.clear();
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 1).add("country", "United States of America").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 44).add("country", "United Kingdom").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 81).add("country", "Japan").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 34).add("country", "Spain").build());
 		itemsToPost.add(Json.createObjectBuilder().add("countryCode", 61).add("country", "Australia").build());
-		reply = restAPI.post(URL + db + "/" + tableJoin, itemsToPost);
+		reply = restAPI.post(URL + "/" + tableJoin, itemsToPost);
 		
 		//3.6a Collection-Collection join
 		commands.add("3.6a Collection-Collection join");
@@ -390,7 +387,7 @@ public class java_rest_HelloGalaxy {
 		joinCollections.setQueryValue(queryValue);
 		queries.clear();
 		queries.add(joinCollections);
-		reply = restAPI.get(URL + db + "/system.join" , queries);
+		reply = restAPI.get(URL + "/system.join" , queries);
 		
 		commands.add("\tJoin collections: " + collection + " and " + collectionJoin);
 		commands.add("\tJoined Documents: " + reply);
@@ -430,7 +427,7 @@ public class java_rest_HelloGalaxy {
 		joinTableWithCol.setQueryValue(queryValue);
 		queries.clear();
 		queries.add(joinTableWithCol);
-		reply = restAPI.get(URL + db + "/system.join" , queries);
+		reply = restAPI.get(URL + "/system.join" , queries);
 		
 		commands.add("\tJoin table with collection: " + table + " and " + collectionJoin);
 		commands.add("\tJoined Documents: " + reply);
@@ -470,7 +467,7 @@ public class java_rest_HelloGalaxy {
 		joinTableWithTable.setQueryValue(queryValue);
 		queries.clear();
 		queries.add(joinTableWithTable);
-		reply = restAPI.get(URL + db + "/system.join" , queries);
+		reply = restAPI.get(URL + "/system.join" , queries);
 		
 		commands.add("\tJoin tables: " + table + " and " + tableJoin);
 		commands.add("\tJoined Documents: " + reply);
@@ -483,7 +480,7 @@ public class java_rest_HelloGalaxy {
 		Query batchSize = new Query("batchSize", 2);
 		queries.clear();
 		queries.add(batchSize);
-		reply = restAPI.get(URL + db + "/" + collection, queries);
+		reply = restAPI.get(URL + "/" + collection, queries);
 		
 		commands.add("\tChange batch size");
 		commands.add("\tFound documents: " + reply);
@@ -501,7 +498,7 @@ public class java_rest_HelloGalaxy {
 		queries.clear();
 		queries.add(projection);
 		queries.add(projectionQuery);
-		reply = restAPI.get(URL + db + "/" + collection, queries);
+		reply = restAPI.get(URL + "/" + collection, queries);
 		
 		commands.add("\tFind with projection: " + projection.toString());
 		commands.add("\tFound Document: " + reply);
@@ -522,7 +519,7 @@ public class java_rest_HelloGalaxy {
 		Query nameQuery = new Query("query", Json.createObjectBuilder().add("name", "Seattle").build());
 		queries.clear();
 		queries.add(nameQuery);
-		reply = restAPI.put(URL + db + "/" + collection, updateDocument, queries);
+		reply = restAPI.put(URL + "/" + collection, updateDocument, queries);
 		
 		for (Query query : queries)
 		commands.add("\tDocument Query -> " + query.toString());
@@ -538,7 +535,7 @@ public class java_rest_HelloGalaxy {
 		nameQuery.setQueryValue(Json.createObjectBuilder().add("name", "Tokyo").build());		
 		queries.clear();
 		queries.add(nameQuery);
-		reply = restAPI.delete(URL + db + "/" + collection, queries);
+		reply = restAPI.delete(URL + "/" + collection, queries);
 		
 		for (Query query : queries)
 		commands.add("\tDocument Query: " + query.toString());
@@ -567,25 +564,25 @@ public class java_rest_HelloGalaxy {
 		//url/dbTest/system.sql?query={"$sql":"create table if not exists town (name varchar(255), countryCode int)"}
 		queries.clear();
 		queries.add(sqlCreate);
-		reply = restAPI.get(URL + db + "/system.sql", queries);
+		reply = restAPI.get(URL + "/system.sql", queries);
 		commands.add("\tSQL Create: " + reply);
 		
 		//url/dbTest/system.sql?query={"$sql":"insert into town values ('Manhattan', 1)"}
 		queries.clear();
 		queries.add(sqlInsert);
-		reply = restAPI.get(URL + db + "/system.sql", queries);
+		reply = restAPI.get(URL + "/system.sql", queries);
 		commands.add("\tSQL Insert: " + reply);
 		
 		//url/dbTest/system.sql?query={"$sql":"select * from town"}
 		queries.clear();
 		queries.add(sqlSelect);
-		reply = restAPI.get(URL + db + "/system.sql", queries);
+		reply = restAPI.get(URL + "/system.sql", queries);
 		commands.add("\tSQL Select: " + reply);
 		
 		//url/dbTest/system.sql?query={"$sql":"drop table town"}
 		queries.clear();
 		queries.add(sqlDrop);
-		reply = restAPI.get(URL + db + "/system.sql", queries);
+		reply = restAPI.get(URL + "/system.sql", queries);
 		commands.add("\tSQL Drop: " + reply);
 		//<------------------------------------->
 		
@@ -599,14 +596,14 @@ public class java_rest_HelloGalaxy {
 		Query transactionStart = new Query("query", Json.createObjectBuilder().add("transaction", "enable").build());
 		queries.clear();
 		queries.add(transactionStart);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL + "/$cmd?", queries);
 		
 		commands.add("\tStart tranaction... " + reply);
 		
 		//transaction insert
 		itemsToPost.clear();
 		itemsToPost.add(sydney.toJson());
-		reply = restAPI.post(URL + db + "/" + collection, itemsToPost);
+		reply = restAPI.post(URL + "/" + collection, itemsToPost);
 		
 		commands.add("\tInsert Document: " + reply);
 		
@@ -622,7 +619,7 @@ public class java_rest_HelloGalaxy {
 		nameQuery.setQueryValue(Json.createObjectBuilder().add("name", "Seattle").build());
 		queries.clear();
 		queries.add(nameQuery);
-		reply = restAPI.put(URL + db + "/" + collection, transactionUpdate, queries);
+		reply = restAPI.put(URL + "/" + collection, transactionUpdate, queries);
 		commands.add("\tUpdate Document: " + reply);
 		
 		//transaction commit
@@ -630,14 +627,14 @@ public class java_rest_HelloGalaxy {
 		Query transactionCommit = new Query("query", Json.createObjectBuilder().add("transaction", "commit").build());
 		queries.clear();
 		queries.add(transactionCommit);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL + "/$cmd?", queries);
 		commands.add("\tCommit Changes... " + reply);
 		
 		//transaction delete
 		nameQuery.setQueryValue(Json.createObjectBuilder().add("name", "Sydney").build());		
 		queries.clear();
 		queries.add(nameQuery);
-		reply = restAPI.delete(URL + db + "/" + collection, queries);
+		reply = restAPI.delete(URL + "/" + collection, queries);
 		commands.add("\tDelete Document: " + reply);
 		
 		//transaction rollback
@@ -645,7 +642,7 @@ public class java_rest_HelloGalaxy {
 		Query transactionRollback = new Query("query", Json.createObjectBuilder().add("transaction", "rollback").build());
 		queries.clear();
 		queries.add(transactionRollback);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL + "/$cmd?", queries);
 		commands.add("\tRollback Changes... " + reply);
 		
 		//transaction status
@@ -653,7 +650,7 @@ public class java_rest_HelloGalaxy {
 		Query transactionStatus = new Query("query", Json.createObjectBuilder().add("transaction", "status").build());
 		queries.clear();
 		queries.add(transactionStatus);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL + "/$cmd?", queries);
 		commands.add("\tTransaction Status: " + reply);
 		
 		//transaction end
@@ -661,7 +658,7 @@ public class java_rest_HelloGalaxy {
 		Query transactionEnd = new Query("query", Json.createObjectBuilder().add("transaction", "disable").build());
 		queries.clear();
 		queries.add(transactionEnd);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL + "/$cmd?", queries);
 		commands.add("\tTransaction End: " + reply);
 		// <------------------------------------->
 		
@@ -674,7 +671,7 @@ public class java_rest_HelloGalaxy {
 		Query catalog = new Query("options", Json.createObjectBuilder().add("includeRelational", true).build());
 		queries.clear();
 		queries.add(catalog);
-		reply = restAPI.get(URL + db, queries);
+		reply = restAPI.get(URL, queries);
 		
 		commands.add("\tCatalog: " + reply);
 		//<------------------------------------->
@@ -686,7 +683,7 @@ public class java_rest_HelloGalaxy {
 		catalog.setQueryValue(Json.createObjectBuilder().add("includeRelational", "true").add("includeSystem", true).build());
 		queries.clear();
 		queries.add(catalog);
-		reply = restAPI.get(URL + db, queries);
+		reply = restAPI.get(URL, queries);
 		
 		commands.add("\tCatalog: " + reply);
 		//<------------------------------------->
@@ -699,7 +696,7 @@ public class java_rest_HelloGalaxy {
 		Query commandQuery = new Query("query", Json.createObjectBuilder().add("collStats", collection).build());
 		queries.clear();
 		queries.add(commandQuery);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL +"/$cmd?", queries);
 		commands.add("\tcollStats: " + reply);
 		//<------------------------------------->
 		
@@ -710,14 +707,14 @@ public class java_rest_HelloGalaxy {
 		commandQuery.setQueryValue(Json.createObjectBuilder().add("dbStats", 1).build());
 		queries.clear();
 		queries.add(commandQuery);
-		reply = restAPI.get(URL + db +"/$cmd?", queries);
+		reply = restAPI.get(URL +"/$cmd?", queries);
 		commands.add("\tdbStats: " + reply);
 		//<------------------------------------->
 				
 		//10 List all collections in a database
 		commands.add("\n10 List all collections in a database");
 		
-		reply = restAPI.get(URL + db, null);
+		reply = restAPI.get(URL, null);
 		
 		commands.add("\tList all Collections: " + reply);
 		//<------------------------------------->
@@ -725,19 +722,19 @@ public class java_rest_HelloGalaxy {
 		//11 Drop a collection
 		commands.add("\n11 Drop a collection");
 		
-		reply = restAPI.delete(URL + db + "/" + collection, null);
+		reply = restAPI.delete(URL + "/" + collection, null);
 		
 		commands.add("\tDelete Collection: " + reply);
 		
-		reply = restAPI.delete(URL + db + "/" + collectionJoin, null);
+		reply = restAPI.delete(URL + "/" + collectionJoin, null);
 		
 		commands.add("\tDelete Collection: " + reply);
 		
-		reply = restAPI.delete(URL + db + "/" + table, null);
+		reply = restAPI.delete(URL + "/" + table, null);
 				
 		commands.add("\tDelete table: " + reply);
 		
-		reply = restAPI.delete(URL + db + "/" + tableJoin, null);
+		reply = restAPI.delete(URL + "/" + tableJoin, null);
 		
 		commands.add("\tDelete table: " + reply);
 		//<------------------------------------->
@@ -746,21 +743,22 @@ public class java_rest_HelloGalaxy {
 	}
 	
 	public static void parseVcap() {
-
+		String serviceName = "timeseriesdatabase";
 		StringReader stringReader = new StringReader(
 				System.getenv("VCAP_SERVICES"));
 		JsonReader jsonReader = Json.createReader(stringReader);
 		JsonObject vcap = jsonReader.readObject();
 		System.out.println("vcap: " + vcap);
+		JsonObject credentials = vcap.getJsonArray(serviceName).getJsonObject(0)
+				.getJsonObject("credentials"); 
+		user = credentials.getString("username");
+		password = credentials.getString("password");
 		boolean ssl = false;
 		if (ssl)
-			URL = vcap.getJsonArray("clouddb-dev").getJsonObject(0)
-					.getJsonObject("credentials").getString("ssl_rest_url");
+			URL = credentials.getString("rest_url_ssl");
 		else
-			URL = vcap.getJsonArray("clouddb-dev").getJsonObject(0)
-					.getJsonObject("credentials").getString("rest_url");
+			URL = credentials.getString("rest_url");
 		System.out.println(URL);
-
 	}
 
 }
