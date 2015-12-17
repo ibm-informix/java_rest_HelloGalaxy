@@ -1,4 +1,4 @@
-package com.ibm.informix;
+package src.com.ibm.informix;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
@@ -18,7 +17,6 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -253,4 +251,8 @@ public class REST {
 //		response.close();
 //		return entity;
 //	}
+	
+	public void closeClient() {
+		client.close();
+	}
 }
