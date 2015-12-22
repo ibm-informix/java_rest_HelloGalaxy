@@ -1,6 +1,4 @@
-package src.com.ibm.informix;
-
-import javax.json.JsonObject;
+package com.ibm.informix;
 
 public class Query {
 	

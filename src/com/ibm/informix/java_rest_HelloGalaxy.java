@@ -36,7 +36,7 @@
  * 11 Drop a collection
  */
 
-package src.com.ibm.informix;
+package com.ibm.informix;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -48,9 +48,15 @@ import javax.json.JsonReader;
 
 public class java_rest_HelloGalaxy {
 	
+	// To run locally, set URL, username, and password here
 	public static String URL = "";
-	public static String user = "";
+	public static String username = "";
 	public static String password = "";
+	
+	// Service name for if credentials are parsed out of the Bluemix VCAP_SERVICES
+	public static String SERVICE_NAME = "timeseriesdatabase";
+	public static boolean USE_SSL = false;
+	
 	public static List<String> commands = new ArrayList<String>();
 	public static List<JsonObject> itemsToPost = new ArrayList<JsonObject>();
 	public static List<Query> queries = new ArrayList<Query>();
@@ -74,6 +80,8 @@ public class java_rest_HelloGalaxy {
 	}
 
 	public static List<String> doEverything() {
+		commands.clear();
+
 		REST restAPI = null;
 		try {
 			// parse VCAP_SERVICES from Bluemix environment
@@ -85,10 +93,10 @@ public class java_rest_HelloGalaxy {
 			String table = "mytable";
 			String tableJoin = "tablejoin";
 			//get access to get, post, put, delete methods
-			restAPI = new REST(user, password);
+			restAPI = new REST(username, password);
 			
 			
-			commands.add("Connected to: " + URL);
+			commands.add("Connecting to: " + URL);
 			commands.add("\nTopics");
 			
 			//1 Data Structures
@@ -141,7 +149,7 @@ public class java_rest_HelloGalaxy {
 							.build())
 						.build())
 					.build();
-			System.out.println(createTable);
+			commands.add("\t" + createTable.toString());
 			itemsToPost.clear();
 			itemsToPost.add(createTable);
 			reply = restAPI.post(URL, itemsToPost);
@@ -282,7 +290,6 @@ public class java_rest_HelloGalaxy {
 						.build())
 					.build();
 			distinct.setQueryValue(queryValue);
-			System.out.println(distinct);
 			queries.clear();
 			queries.add(distinct);
 			reply = restAPI.get(URL + "/$cmd", queries);
@@ -724,29 +731,44 @@ public class java_rest_HelloGalaxy {
 			//<------------------------------------->
 		
 		} catch (Exception e) {
+			commands.add("ERROR: " + e);
 			e.printStackTrace();
+			System.out.println("-------------------------------------\n");
 		} finally {
-			restAPI.closeClient();
+			if (restAPI != null) {
+				restAPI.closeClient();
+			}
 		}
 		return commands;
 	}
 	
-	public static void parseVcap() {
+	public static void parseVcap() throws Exception {
+		if (URL != null && !URL.equals("")) {
+			// If URL is already set, use it as is
+			return;
+		}
+ 
+		// Otherwise parse URL and credentials from VCAP_SERVICES
 		String serviceName = System.getenv("SERVICE_NAME");
 		if(serviceName == null || serviceName.length() == 0) {
-			serviceName = "timeseriesdatabase";
+			serviceName = SERVICE_NAME;
 		}
-		StringReader stringReader = new StringReader(
-				System.getenv("VCAP_SERVICES"));
+		String vcapServices = System.getenv("VCAP_SERVICES");
+		if (vcapServices == null) {
+			throw new Exception("VCAP_SERVICES not found in the environment"); 
+		}
+		StringReader stringReader = new StringReader(vcapServices);
 		JsonReader jsonReader = Json.createReader(stringReader);
 		JsonObject vcap = jsonReader.readObject();
 		System.out.println("vcap: " + vcap);
+		if (vcap.getJsonArray(serviceName) == null) {
+			throw new Exception("Service " + serviceName + " not found in VCAP_SERVICES");
+		}
 		JsonObject credentials = vcap.getJsonArray(serviceName).getJsonObject(0)
 				.getJsonObject("credentials"); 
-		user = credentials.getString("username");
+		username = credentials.getString("username");
 		password = credentials.getString("password");
-		boolean ssl = false;
-		if (ssl)
+		if (USE_SSL)
 			URL = credentials.getString("rest_url_ssl");
 		else
 			URL = credentials.getString("rest_url");
